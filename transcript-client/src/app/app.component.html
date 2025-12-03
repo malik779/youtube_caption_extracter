@@ -1,0 +1,85 @@
+<main class="page">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Transcript toolkit</p>
+      <h1>Download clean YouTube transcripts</h1>
+      <p class="subtitle">
+        Paste any video link. We pull manual and auto captions, scrub the noise, and hand you
+        ready-to-read paragraphs you can export as text or PDF.
+      </p>
+      <div class="sample-list" aria-label="Sample videos">
+        <span>Try these:</span>
+        <button type="button" *ngFor="let url of samples" (click)="applySample(url)">
+          {{ url.split('v=').pop() }}
+        </button>
+      </div>
+    </div>
+
+    <form class="transcript-form" [formGroup]="form" (ngSubmit)="handleSubmit()" novalidate>
+      <label for="url">YouTube URL</label>
+      <input
+        id="url"
+        type="url"
+        formControlName="url"
+        placeholder="https://www.youtube.com/watch?v=..."
+        [class.is-invalid]="controls.url.invalid && controls.url.touched"
+        autocomplete="url"
+      />
+      <small *ngIf="controls.url.invalid && controls.url.touched">
+        A valid YouTube link is required.
+      </small>
+
+      <label for="language">Language (optional)</label>
+      <input
+        id="language"
+        type="text"
+        formControlName="language"
+        placeholder="en"
+        maxlength="10"
+        autocomplete="off"
+      />
+      <small>Use ISO codes like <strong>en</strong>, <strong>es</strong>, or <strong>hi</strong>.</small>
+
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Fetching transcript…' : 'Fetch transcript' }}
+      </button>
+      <p class="helper">No sign-in required. We only touch YouTube's public caption endpoints.</p>
+    </form>
+  </section>
+
+  <section *ngIf="errorMessage()" class="card card--error" aria-live="polite">
+    {{ errorMessage() }}
+  </section>
+
+  <section *ngIf="transcript() as result" class="card result" aria-live="polite">
+    <header>
+      <div>
+        <p class="eyebrow">Transcript ready</p>
+        <h2>{{ result.title }}</h2>
+        <p class="meta">{{ trackSummary() }}</p>
+        <p class="meta">Video ID: {{ result.videoId }}</p>
+      </div>
+      <div class="actions">
+        <button type="button" class="secondary" (click)="download('txt')">Download .txt</button>
+        <button type="button" (click)="download('pdf')">Download .pdf</button>
+      </div>
+    </header>
+
+    <div class="transcript-body">
+      <article *ngFor="let paragraph of result.paragraphs; trackBy: trackByParagraph">
+        {{ paragraph }}
+      </article>
+    </div>
+  </section>
+
+  <section class="card checklist">
+    <h3>What this service does</h3>
+    <ol>
+      <li>Accepts any public YouTube URL and extracts the underlying video id.</li>
+      <li>Discovers manual + auto caption tracks through YouTube's public metadata.</li>
+      <li>Downloads the caption segments as JSON and stitches them into full text.</li>
+      <li>Removes timestamps, filler tags (like [Music]) and excessive line breaks.</li>
+      <li>Returns clean paragraphs you can copy, download, or feed into your workflows.</li>
+    </ol>
+  </section>
+</main>
